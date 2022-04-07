@@ -53,13 +53,14 @@ class _TimeLinePageState extends State<TimeLinePage> {
         itemBuilder: (context, index) {
           return Container(
             decoration: BoxDecoration(
-              border: index == 0 ? Border(
-                top: BorderSide(color: Colors.grey, width: 0),
-                bottom: BorderSide(color: Colors.grey, width: 0)
-              ) : Border(
-                bottom: BorderSide(color: Colors.grey, width: 0),)
-            ),
-            padding: EdgeInsets.symmetric(horizontal: 10,vertical: 15),
+                border: index == 0
+                    ? Border(
+                        top: BorderSide(color: Colors.grey, width: 0),
+                        bottom: BorderSide(color: Colors.grey, width: 0))
+                    : Border(
+                        bottom: BorderSide(color: Colors.grey, width: 0),
+                      )),
+            padding: EdgeInsets.symmetric(horizontal: 10, vertical: 15),
             child: Row(
               children: [
                 CircleAvatar(
@@ -100,19 +101,14 @@ class _TimeLinePageState extends State<TimeLinePage> {
           );
         },
       ),
-
       floatingActionButton: FloatingActionButton(
-        onPressed: (){
-           Navigator.push(
-    context,
-    MaterialPageRoute(builder: (context) => PostPage()),
-  );
-
-
-
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => PostPage()),
+          );
         },
         child: Icon(Icons.chat_bubble_outline),
-      
       ),
     );
   }
