@@ -15,7 +15,7 @@ class TimeLinePage extends StatefulWidget {
 class _TimeLinePageState extends State<TimeLinePage> {
   Account myAccount = Account(
       id: '1',
-      name: 'flutterラボ',
+      name: 'ルフィ',
       selfIntroduction: 'こんばんは',
       userId: 'flutter_labo',
       imagePath:
@@ -63,9 +63,12 @@ class _TimeLinePageState extends State<TimeLinePage> {
             padding: EdgeInsets.symmetric(horizontal: 10, vertical: 15),
             child: Row(
               children: [
-                CircleAvatar(
-                  radius: 22,
-                  foregroundImage: NetworkImage(myAccount.imagePath),
+                Padding(
+                  padding: const EdgeInsets.only(top: 6, right: 8,),
+                  child: CircleAvatar(
+                    radius: 28,
+                    foregroundImage: NetworkImage(myAccount.imagePath),
+                  ),
                 ),
                 Expanded(
                   child: Container(
