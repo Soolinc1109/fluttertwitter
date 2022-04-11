@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
@@ -19,8 +20,8 @@ class _AccountPageState extends State<AccountPage> {
       userId: 'flutter_labo',
       imagePath:
           'https://pbs.twimg.com/media/FPMLMBKaIAAy8If?format=jpg&name=large',
-      createdTime: DateTime.now(),
-      updatedTime: DateTime.now());
+      createdTime: Timestamp.now(),
+      updatedTime: Timestamp.now());
 
   List<Post> postList = [
     Post(
