@@ -15,7 +15,7 @@ class _AccountPageState extends State<AccountPage> {
   Account myAccount = Account(
       id: '1',
       name: 'flutterラボ',
-      selfIntroduction: 'こんばんは',
+      selfIntroduction: '海賊王に俺はなる！',
       userId: 'flutter_labo',
       imagePath:
           'https://pbs.twimg.com/media/FPMLMBKaIAAy8If?format=jpg&name=large',
@@ -25,12 +25,12 @@ class _AccountPageState extends State<AccountPage> {
   List<Post> postList = [
     Post(
         id: '1',
-        content: '初めまして',
+        content: 'おまんじゅうが１つ',
         postAccountId: '1',
         createdTime: DateTime.now()),
     Post(
         id: '2',
-        content: '初めまして２回目',
+        content: 'おまんじゅうが２つ',
         postAccountId: '2',
         createdTime: DateTime.now()),
   ];

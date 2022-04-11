@@ -1,5 +1,6 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttertwitter/utils/authentication.dart';
 import 'package:fluttertwitter/view/screen.dart';
 import 'package:fluttertwitter/view/start_up/create_account_page.dart';
 
@@ -57,22 +58,27 @@ class _LoginPageState extends State<LoginPage> {
                       recognizer: TapGestureRecognizer()
                         ..onTap = () {
                           Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (context) =>  CreateAccountPage()),
-                        );
-
-
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => CreateAccountPage()),
+                          );
                         })
                 ],
               ),
             ),
-            SizedBox(height: 60,),
-            ElevatedButton(onPressed: () {
-              Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(builder: (context) => Screen()),
-            );
-            }, child: Text('emailでログイン'))
+            SizedBox(
+              height: 60,
+            ),
+            ElevatedButton(
+                onPressed: () async {
+                  var result = await Authentication.emailSignIn(
+                      email: emailController.text, pass: passController.text);
+                  if (result == true) {
+                    Navigator.pushReplacement(context,
+                        MaterialPageRoute(builder: (context) => Screen()));
+                  }
+                },
+                child: Text('emailでログイン'))
           ]),
         ),
       ),
