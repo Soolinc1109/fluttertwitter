@@ -1,36 +1,47 @@
 import 'dart:io';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertwitter/model/account.dart';
 import 'package:fluttertwitter/utils/authentication.dart';
 import 'package:fluttertwitter/utils/firestore/users.dart';
+import 'package:fluttertwitter/utils/function_utils.dart';
 import 'package:fluttertwitter/utils/widget_utils.dart';
 import 'package:image_picker/image_picker.dart';
 
-import '../../utils/function_utils.dart';
-
-class CreateAccountPage extends StatefulWidget {
-  const CreateAccountPage({Key? key}) : super(key: key);
+class EditAccountPage extends StatefulWidget {
+  const EditAccountPage({Key? key}) : super(key: key);
 
   @override
-  _CreateAccountPageState createState() => _CreateAccountPageState();
+  _EditAccountPageState createState() => _EditAccountPageState();
 }
 
-class _CreateAccountPageState extends State<CreateAccountPage> {
+class _EditAccountPageState extends State<EditAccountPage> {
+  Account myAccount = Authentication.myAccount!; //初期段階で編集画面に内容を追加する
   TextEditingController nameController = TextEditingController();
   TextEditingController userIdController = TextEditingController();
   TextEditingController selfIntroductionController = TextEditingController();
-  TextEditingController passController = TextEditingController();
-  TextEditingController emailController = TextEditingController();
   File? image;
 
+  ImageProvider getImage() {
+    if (image == null) {
+      return NetworkImage(myAccount.imagePath);
+    } else {
+      return FileImage(image!);
+    }
+  }
 
+  @override //初期段階で編集画面に内容を追加する
+  void initState() {
+    super.initState();
+    nameController = TextEditingController(text: myAccount.name);
+    userIdController = TextEditingController(text: myAccount.userId);
+    selfIntroductionController =
+        TextEditingController(text: myAccount.selfIntroduction);
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: WidgetUtils.createAppBar('新規登録'),
+        appBar: WidgetUtils.createAppBar('プロフィール編集'),
         body: SingleChildScrollView(
           child: Container(
             width: double.infinity,
@@ -49,7 +60,7 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
                     }
                   },
                   child: CircleAvatar(
-                    foregroundImage: image == null ? null : FileImage(image!),
+                    foregroundImage: getImage(),
                     radius: 40,
                     child: Icon(Icons.add),
                   ),
@@ -74,23 +85,6 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
                 Container(
                   width: 300,
                   child: TextField(
-                    controller: emailController,
-                    decoration: InputDecoration(hintText: 'メールアドレス'),
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 20.0),
-                  child: Container(
-                    width: 300,
-                    child: TextField(
-                      controller: passController,
-                      decoration: InputDecoration(hintText: 'パスワード'),
-                    ),
-                  ),
-                ),
-                Container(
-                  width: 300,
-                  child: TextField(
                     controller: selfIntroductionController,
                     decoration: InputDecoration(hintText: '自己紹介'),
                   ),
@@ -98,35 +92,37 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
                 SizedBox(
                   height: 50,
                 ),
+
+                // 情報を更新
                 ElevatedButton(
                     onPressed: () async {
                       if (nameController.text.isNotEmpty &&
                           userIdController.text.isNotEmpty &&
-                          selfIntroductionController.text.isNotEmpty &&
-                          emailController.text.isNotEmpty &&
-                          passController.text.isNotEmpty &&
-                          image != null) {
-                        var result = await Authentication.signUp(
-                            email: emailController.text,
-                            pass: passController.text);
-                        if (result is UserCredential) {
-                          String imagePath =
-                              await FunctionUtils.upLoadImage(result.user!.uid, image!);
-                          Account newAccount = Account(
-                            id: result.user!.uid,
+                          selfIntroductionController.text.isNotEmpty) {
+                        String imagePath = '';
+                        if (image == null) {
+                          imagePath = myAccount.imagePath;
+                        } else {
+                          var result = await FunctionUtils.upLoadImage(
+                              myAccount.id, image!);
+                          imagePath = result;
+                        }
+                        Account updateAccount = Account(
+                            id: myAccount.id,
                             name: nameController.text,
                             userId: userIdController.text,
                             selfIntroduction: selfIntroductionController.text,
-                            imagePath: imagePath,
-                          );
-                          var _result = await UserFirestore.setUser(newAccount);
-                          if (_result == true) {
-                            Navigator.pop(context);
-                          }
+                            imagePath: imagePath); // Account
+
+                        Authentication.myAccount = updateAccount;
+                        var result =
+                            await UserFirestore.updateUser(updateAccount);
+                        if (result == true) {
+                          Navigator.pop(context, true);
                         }
                       }
                     },
-                    child: Text('アカウントを作成'))
+                    child: Text('更新'))
               ],
             ),
           ),

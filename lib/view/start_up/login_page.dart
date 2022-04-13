@@ -1,6 +1,8 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertwitter/utils/authentication.dart';
+import 'package:fluttertwitter/utils/firestore/users.dart';
 import 'package:fluttertwitter/view/screen.dart';
 import 'package:fluttertwitter/view/start_up/create_account_page.dart';
 
@@ -22,7 +24,7 @@ class _LoginPageState extends State<LoginPage> {
         child: Container(
           width: double.infinity,
           child: Column(children: [
-            SizedBox(height: 50),
+            SizedBox(height: 200),
             Text(
               'Flutterラボ SNS',
               style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
@@ -69,13 +71,18 @@ class _LoginPageState extends State<LoginPage> {
             SizedBox(
               height: 60,
             ),
+            //ボタンを押してログイン
             ElevatedButton(
                 onPressed: () async {
                   var result = await Authentication.emailSignIn(
                       email: emailController.text, pass: passController.text);
-                  if (result == true) {
-                    Navigator.pushReplacement(context,
-                        MaterialPageRoute(builder: (context) => Screen()));
+                  if (result is UserCredential) {
+                    var _result = await UserFirestore.getUser(result.user!.uid);
+                    if(_result = true){
+                            Navigator.pushReplacement(context,      
+                            MaterialPageRoute(builder: (context) => Screen()));
+                    }
+                    
                   }
                 },
                 child: Text('emailでログイン'))
