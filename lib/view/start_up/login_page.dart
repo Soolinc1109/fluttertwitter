@@ -26,7 +26,7 @@ class _LoginPageState extends State<LoginPage> {
           child: Column(children: [
             SizedBox(height: 200),
             Text(
-              'Flutterラボ SNS',
+              'SNS　モックアプリ',
               style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
             ),
             Padding(
@@ -78,11 +78,10 @@ class _LoginPageState extends State<LoginPage> {
                       email: emailController.text, pass: passController.text);
                   if (result is UserCredential) {
                     var _result = await UserFirestore.getUser(result.user!.uid);
-                    if(_result = true){
-                            Navigator.pushReplacement(context,      
-                            MaterialPageRoute(builder: (context) => Screen()));
+                    if (_result = true) {
+                      Navigator.pushReplacement(context,
+                          MaterialPageRoute(builder: (context) => Screen()));
                     }
-                    
                   }
                 },
                 child: Text('emailでログイン'))
