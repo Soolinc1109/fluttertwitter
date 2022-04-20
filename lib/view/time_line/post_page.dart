@@ -35,13 +35,11 @@ class _PostPageState extends State<PostPage> {
           ElevatedButton(
               onPressed: () async {
                 if (contentController.text.isNotEmpty) {
-                  print(contentController.text);
                   Post newPost = Post(
                     content: contentController.text,
                     postAccountId: Authentication.myAccount!.id,
                   );
-                  // Post
-                  var result = await PostFirestore.addPost(newPost);
+                  var result = await PostFirestore().addPost(newPost);
                   if (result == true) {
                     Navigator.pop(context);
                   }

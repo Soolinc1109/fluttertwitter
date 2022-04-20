@@ -4,18 +4,18 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 
+
+
 class FunctionUtils {
+  //画像を読み込む
   static Future<dynamic> getImageFromGallery() async {
     ImagePicker picker = ImagePicker();
     final pickedFile = await picker.pickImage(source: ImageSource.gallery);
     return pickedFile;
-    // if (pickedFile != null) {
-    //   setState(() {
-    //     image = File(pickedFile.path);
-    //   });
-    // }
   }
 
+
+  //画像をアップロードする
   static Future<String> upLoadImage(String uid, File image) async {
     final FirebaseStorage storageInstance = FirebaseStorage.instance;
     final Reference ref = storageInstance.ref();
@@ -24,5 +24,9 @@ class FunctionUtils {
     print('image_path: $downloadUrl');
     return downloadUrl;
   }
+
+
+//future→時間をかけて読み込む,dynamic→どんなデータ形でもいける(あんまりよくない)
+
+
 }
- 

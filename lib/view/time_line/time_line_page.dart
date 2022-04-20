@@ -3,6 +3,8 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertwitter/model/account.dart';
 import 'package:fluttertwitter/model/post.dart';
+import 'package:fluttertwitter/utils/firestore/posts.dart';
+import 'package:fluttertwitter/utils/firestore/users.dart';
 import 'package:fluttertwitter/view/time_line/post_page.dart';
 import 'package:intl/intl.dart';
 
@@ -14,29 +16,6 @@ class TimeLinePage extends StatefulWidget {
 }
 
 class _TimeLinePageState extends State<TimeLinePage> {
-  Account myAccount = Account(
-      id: '1',
-      name: 'ルフィ',
-      selfIntroduction: 'こんばんは',
-      userId: 'flutter_labo',
-      imagePath:
-          'https://pbs.twimg.com/media/FPMLMBKaIAAy8If?format=jpg&name=large',
-      createdTime: Timestamp.now(),
-      updatedTime: Timestamp.now());
-
-  List<Post> postList = [
-    Post(
-        id: '1',
-        content: '初めまして',
-        postAccountId: '1',
-        createdTime: Timestamp.now()),
-    Post(
-        id: '2',
-        content: '初めまして２回目',
-        postAccountId: '2',
-        createdTime: Timestamp.now()),
-  ];
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -49,62 +28,109 @@ class _TimeLinePageState extends State<TimeLinePage> {
         backgroundColor: Theme.of(context).canvasColor,
         elevation: 2,
       ),
-      body: ListView.builder(
-        itemCount: postList.length,
-        itemBuilder: (context, index) {
-          return Container(
-            decoration: BoxDecoration(
-                border: index == 0
-                    ? Border(
-                        top: BorderSide(color: Colors.grey, width: 0),
-                        bottom: BorderSide(color: Colors.grey, width: 0))
-                    : Border(
-                        bottom: BorderSide(color: Colors.grey, width: 0),
-                      )),
-            padding: EdgeInsets.symmetric(horizontal: 10, vertical: 15),
-            child: Row(
-              children: [
-                Padding(
-                  padding: const EdgeInsets.only(top: 6, right: 8,),
-                  child: CircleAvatar(
-                    radius: 28,
-                    foregroundImage: NetworkImage(myAccount.imagePath),
-                  ),
-                ),
-                Expanded(
-                  child: Container(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Row(
+      body: StreamBuilder<QuerySnapshot>(
+          stream: PostFirestore.posts.orderBy('created_time',descending: true).snapshots(),
+          builder: (context, postSnapshot) {
+            if (postSnapshot.hasData) {
+              List<String> postAccountIds = [];
+              postSnapshot.data!.docs.forEach((doc) {
+                Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
+                if (!postAccountIds.contains(data['post_account_id'])) {
+                  postAccountIds.add(data['post_account_id']);
+                }
+              });
+              return FutureBuilder<Map<String, Account>?>(
+                  future: UserFirestore.getPostUserMap(postAccountIds),
+                  builder: (context, userSnapshot) {
+                    if (userSnapshot.hasData &&
+                        userSnapshot.connectionState == ConnectionState.done) {
+                      return ListView.builder(
+                        itemCount: postSnapshot.data!.docs.length,
+                        itemBuilder: (context, index) {
+                          Map<String, dynamic> data =
+                              postSnapshot.data!.docs[index].data()
+                                  as Map<String, dynamic>;
+                          Post post = Post(
+                              id: postSnapshot.data!.docs[index].id,
+                              content: data['content'],
+                              postAccountId: data['post_account_id'],
+                              createdTime: data['created_time']);
+                          Account postAccount =
+                              userSnapshot.data![post.postAccountId]!;
+                          return Container(
+                            decoration: BoxDecoration(
+                                border: index == 0
+                                    ? Border(
+                                        top: BorderSide(
+                                            color: Colors.grey, width: 0),
+                                        bottom: BorderSide(
+                                            color: Colors.grey, width: 0))
+                                    : Border(
+                                        bottom: BorderSide(
+                                            color: Colors.grey, width: 0),
+                                      )),
+                            padding: EdgeInsets.symmetric(
+                                horizontal: 10, vertical: 15),
+                            child: Row(
                               children: [
-                                Text(
-                                  myAccount.name,
-                                  style: TextStyle(fontWeight: FontWeight.bold),
+                                Padding(
+                                  padding: const EdgeInsets.only(
+                                    top: 6,
+                                    right: 8,
+                                  ),
+                                  child: CircleAvatar(
+                                    radius: 28,
+                                    foregroundImage:
+                                        NetworkImage(postAccount.imagePath),
+                                  ),
                                 ),
-                                Text(
-                                  '@${myAccount.userId}',
-                                  style: TextStyle(color: Colors.grey),
-                                ),
+                                Expanded(
+                                  child: Container(
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.spaceBetween,
+                                          children: [
+                                            Row(
+                                              children: [
+                                                Text(
+                                                  postAccount.name,
+                                                  style: TextStyle(
+                                                      fontWeight:
+                                                          FontWeight.bold),
+                                                ),
+                                                Text(
+                                                  '@${postAccount.userId}',
+                                                  style: TextStyle(
+                                                      color: Colors.grey),
+                                                ),
+                                              ],
+                                            ),
+                                            Text(DateFormat('M/d/yy').format(
+                                                post.createdTime!.toDate()))
+                                          ],
+                                        ),
+                                        Text(post.content)
+                                      ],
+                                    ),
+                                  ),
+                                )
                               ],
                             ),
-                            Text(DateFormat('M/d/yy')
-                                .format(postList[index].createdTime!.toDate()))
-                          ],
-                        ),
-                        Text(postList[index].content)
-                      ],
-                    ),
-                  ),
-                )
-              ],
-            ),
-          );
-        },
-      ),
+                          );
+                        },
+                      );
+                    } else {
+                      return Container();
+                    }
+                  });
+            } else {
+              return Container();
+            }
+          }),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           Navigator.push(

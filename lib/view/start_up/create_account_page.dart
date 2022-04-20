@@ -6,6 +6,7 @@ import 'package:fluttertwitter/model/account.dart';
 import 'package:fluttertwitter/utils/authentication.dart';
 import 'package:fluttertwitter/utils/firestore/users.dart';
 import 'package:fluttertwitter/utils/widget_utils.dart';
+import 'package:fluttertwitter/view/start_up/check_email_page.dart';
 import 'package:image_picker/image_picker.dart';
 
 import '../../utils/function_utils.dart';
@@ -24,8 +25,6 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
   TextEditingController passController = TextEditingController();
   TextEditingController emailController = TextEditingController();
   File? image;
-
-
 
   @override
   Widget build(BuildContext context) {
@@ -110,8 +109,8 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
                             email: emailController.text,
                             pass: passController.text);
                         if (result is UserCredential) {
-                          String imagePath =
-                              await FunctionUtils.upLoadImage(result.user!.uid, image!);
+                          String imagePath = await FunctionUtils.upLoadImage(
+                              result.user!.uid, image!);
                           Account newAccount = Account(
                             id: result.user!.uid,
                             name: nameController.text,
@@ -121,7 +120,13 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
                           );
                           var _result = await UserFirestore.setUser(newAccount);
                           if (_result == true) {
-                            Navigator.pop(context);
+                            result.user!.sendEmailVerification();
+                             Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (context) => CheckEmailPage(email: emailController.text,pass: passController.text,)),
+                            );
+
+
                           }
                         }
                       }
