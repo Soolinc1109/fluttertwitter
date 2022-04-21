@@ -1,8 +1,10 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+
 class Post {
   late String id;
   late String content;
   late String postAccountId;
-  DateTime? createdTime;
+  Timestamp? createdTime;
 
   Post({
     this.id = '',
